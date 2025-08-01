@@ -42,13 +42,7 @@ Este proyecto utiliza **GitHub Actions** para automatización completa:
    - Ejecuta tests unitarios y de widgets
    - Análisis estático con Flutter analyzer
    - Verificación de cobertura (mínimo 80%)
-   - Builds de Android e iOS
-   - Subida de artefactos
-
-2. **Release Pipeline** (`.github/workflows/release.yml`)
-   - Creación automática de releases en GitHub
-   - Builds de producción (APK y AAB)
-   - Subida de artefactos de release
+   - Builds de Android e iOS para validación
 
 ### Protección de Rama
 
@@ -112,7 +106,6 @@ flutter build apk --release
 El proyecto incluye scripts útiles en la carpeta `scripts/`:
 
 - **`setup_dev.sh`**: Configuración inicial del entorno
-- **`prepare_release.sh`**: Preparación para releases
 - **`setup_branch_protection.sh`**: Configuración de protección de rama
 
 ### Uso de Scripts
@@ -121,59 +114,42 @@ El proyecto incluye scripts útiles en la carpeta `scripts/`:
 # Configurar entorno de desarrollo
 ./scripts/setup_dev.sh
 
-# Preparar release
-./scripts/prepare_release.sh
-
 # Configurar protección de rama (requiere GitHub CLI)
 ./scripts/setup_branch_protection.sh
 ```
 
-## Proceso de Release
+## Flujo de Trabajo de Contribución
 
-1. **Preparar release**:
+1. **Crear rama de feature**:
    ```bash
-   ./scripts/prepare_release.sh
+   git checkout -b feature/nueva-funcionalidad
    ```
 
-2. **Crear tag de versión**:
+2. **Desarrollar y probar**:
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   flutter test
+   flutter analyze
    ```
 
-3. **El pipeline automáticamente**:
-   - Construye artefactos de producción
-   - Crea release en GitHub
-   - Sube APK y AAB
+3. **Commit con mensaje descriptivo**:
+   ```bash
+   git commit -m "feat: añadir nueva funcionalidad"
+   ```
 
-## Instalación de la App
+4. **Push y crear PR**:
+   ```bash
+   git push origin feature/nueva-funcionalidad
+   ```
 
-### Android
+5. **El CI verificará automáticamente**:
+   - ✅ Tests pasan
+   - ✅ Cobertura ≥ 80%
+   - ✅ Sin errores de análisis estático
+   - ✅ Build exitoso
 
-1. Ve a [Releases](https://github.com/sooyvilla/to_do_abstracta_app/releases)
-2. Descarga el APK más reciente
-3. Instala el APK en tu dispositivo
+6. **Revisión y merge**: Requiere aprobación de al menos 1 revisor
 
 ## Testing
-
-El proyecto mantiene una cobertura de pruebas del **80%** mínimo:
-
-```bash
-# Ejecutar todos los tests
-flutter test
-
-# Tests con reporte de cobertura
-flutter test --coverage
-
-# Ver cobertura en HTML
-genhtml coverage/lcov.info -o coverage/html
-open coverage/html/index.html
-```
-
-### Tipos de Tests
-
-- **Unit Tests**: Casos de uso, servicios, utilidades
-- **Widget Tests**: Componentes UI individuales
 
 ## Convenciones
 
