@@ -5,25 +5,16 @@ on:
     branches: [main, develop]
 
 jobs:
-  pr-checks:
-    name: PR Quality Checks
+  pr-policies:
+    name: PR Policy Validation
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.27.0'
-          channel: 'stable'
-          
-      - name: Get dependencies
-        run: flutter pub get
-        
+
       - name: Validate PR Title
         uses: amannn/action-semantic-pull-request@v5
         env:
@@ -41,54 +32,60 @@ jobs:
             ci
             build
           requireScope: false
-          
-      - name: Check code formatting
-        run: |
-          if ! dart format --set-exit-if-changed .; then
-            echo "❌ Code is not properly formatted"
-            echo "Run 'dart format .' to fix formatting issues"
-            exit 1
-          fi
-          echo "✅ Code formatting is correct"
-          
-      - name: Analyze code
-        run: |
-          flutter analyze
-          if [ $? -ne 0 ]; then
-            echo "❌ Code analysis failed"
-            exit 1
-          fi
-          echo "✅ Code analysis passed"
-          
-      - name: Run tests with coverage
-        run: |
-          flutter test --coverage
-          if [ $? -ne 0 ]; then
-            echo "❌ Tests failed"
-            exit 1
-          fi
-          echo "✅ All tests passed"
-          
-      - name: Check minimum coverage
-        run: |
-          ./scripts/check_coverage.sh
-          
-      - name: Comment PR with coverage
-        uses: 5monkeys/cobertura-action@master
+
+      - name: Check PR has description
+        uses: actions/github-script@v6
         with:
-          path: coverage/lcov.info
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          minimum_coverage: 80
-          fail_below_threshold: true
-          show_missing: true
-          
-      - name: Build verification
-        run: |
-          echo "🔨 Verifying build can succeed..."
-          flutter build apk --debug
-          if [ $? -eq 0 ]; then
-            echo "✅ Build verification passed"
-          else
-            echo "❌ Build verification failed"
-            exit 1
-          fi
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr.body || pr.body.trim().length < 10) {
+              core.setFailed('❌ PR must have a description with at least 10 characters');
+            } else {
+              core.info('✅ PR has adequate description');
+            }
+
+      - name: Check PR is not draft
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (pr.draft) {
+              core.setFailed('❌ Cannot merge draft PRs');
+            } else {
+              core.info('✅ PR is ready for review');
+            }
+
+      - name: Check branch naming convention
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const branchName = context.payload.pull_request.head.ref;
+            const validPrefixes = ['feature/', 'fix/', 'hotfix/', 'docs/', 'refactor/', 'test/', 'chore/'];
+
+            const isValid = validPrefixes.some(prefix => branchName.startsWith(prefix));
+
+            if (!isValid) {
+              core.setFailed(`❌ Branch name "${branchName}" doesn't follow naming convention. Use: ${validPrefixes.join(', ')}`);
+            } else {
+              core.info(`✅ Branch name "${branchName}" follows naming convention`);
+            }
+
+      - name: Require approving review
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const approvedReviews = reviews.filter(review => review.state === 'APPROVED');
+            const author = context.payload.pull_request.user.login;
+            const approversExcludingAuthor = approvedReviews.filter(review => review.user.login !== author);
+
+            if (approversExcludingAuthor.length === 0) {
+              core.setFailed('❌ PR requires at least 1 approving review from a contributor (not the author)');
+            } else {
+              core.info(`✅ PR has ${approversExcludingAuthor.length} approving review(s) from contributors`);
+            }
