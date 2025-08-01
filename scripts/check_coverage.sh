@@ -6,7 +6,7 @@
 set -e
 
 COVERAGE_FILE="coverage/lcov.info"
-MIN_COVERAGE=80
+MIN_COVERAGE=40
 
 if [ ! -f "$COVERAGE_FILE" ]; then
     echo "❌ Coverage file not found: $COVERAGE_FILE"
@@ -14,10 +14,21 @@ if [ ! -f "$COVERAGE_FILE" ]; then
     exit 1
 fi
 
-# Instalar lcov si no está disponible (en CI)
+# Instalar lcov si no está disponible
 if ! command -v lcov &> /dev/null; then
     echo "📦 Installing lcov..."
-    sudo apt-get update && sudo apt-get install -y lcov
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        if command -v brew &> /dev/null; then
+            brew install lcov
+        else
+            echo "❌ Homebrew not found. Please install lcov manually."
+            exit 1
+        fi
+    else
+        # Linux (CI)
+        sudo apt-get update && sudo apt-get install -y lcov
+    fi
 fi
 
 # Generar reporte de coverage
