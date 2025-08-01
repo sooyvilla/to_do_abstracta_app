@@ -267,5 +267,54 @@ void main() {
       expect(result, task2);
       expect(result?.id, '2');
     });
+
+    test('should watch tasks and emit changes', () async {
+      // Arrange
+      final taskModel = TaskModel(
+        id: '1',
+        title: 'Test Task',
+        description: 'Description',
+        tags: const ['tag1'],
+        status: TaskStatus.pending,
+        assignedUser: 'user1',
+        createdAt: DateTime.now(),
+        priority: TaskPriority.medium,
+      );
+
+      when(mockBox.values).thenReturn([taskModel]);
+      when(mockBox.watch()).thenAnswer(
+          (_) => Stream.fromIterable([])); // Empty stream for BoxEvent
+
+      // Act
+      final stream = datasource.watchTasks();
+      final firstEmission = await stream.first;
+
+      // Assert
+      expect(firstEmission.length, 1);
+      expect(firstEmission.first.id, '1');
+      verify(mockBox.values).called(greaterThan(0));
+    });
+
+    test('should handle stream errors in watchTasks', () async {
+      // Arrange
+      when(mockBox.values).thenThrow(Exception('Database error'));
+
+      // Act
+      final stream = datasource.watchTasks();
+
+      // Assert
+      expect(stream, emitsError(isA<Exception>()));
+    });
+
+    test('should handle exception in getTaskById', () async {
+      // Arrange
+      when(mockBox.values).thenThrow(Exception('Database error'));
+
+      // Act
+      final result = await datasource.getTaskById('test-id');
+
+      // Assert
+      expect(result, isNull);
+    });
   });
 }

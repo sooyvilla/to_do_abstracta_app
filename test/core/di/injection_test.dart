@@ -41,7 +41,9 @@ void main() {
       expect(llmDatasource, isA<LLMDatasourceImpl>());
     });
 
-    test('should provide same LLM instance on multiple calls (singleton behavior)', () {
+    test(
+        'should provide same LLM instance on multiple calls (singleton behavior)',
+        () {
       // Act
       final llmUsecases1 = container.read(llmUsecasesProvider);
       final llmUsecases2 = container.read(llmUsecasesProvider);
