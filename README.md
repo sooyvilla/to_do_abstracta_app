@@ -44,12 +44,6 @@ Este proyecto utiliza **GitHub Actions** para automatización completa:
    - Verificación de cobertura (mínimo 80%)
    - Validación de formato de código
 
-2. **PR Quality Gate** (`.github/workflows/pr.yml`)
-   - Validación de título con Conventional Commits
-   - Verificación de descripción del PR
-   - Validación de convención de nombres de rama
-   - Requerimiento de revisión de contribuidor
-
 ### Protección de Rama
 
 La rama `main` está protegida con las siguientes reglas:
