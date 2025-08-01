@@ -21,16 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           types: |
-            feat
-            fix
-            docs
-            style
-            refactor
-            test
-            chore
-            perf
-            ci
-            build
+            release/
           requireScope: false
 
       - name: Check PR has description
