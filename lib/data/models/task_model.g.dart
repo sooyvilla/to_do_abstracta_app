@@ -129,7 +129,7 @@ class TaskPriorityAdapter extends TypeAdapter<TaskPriority> {
       case 3:
         return TaskPriority.urgent;
       default:
-        return TaskPriority.medium;
+        return TaskPriority.low;
     }
   }
 
