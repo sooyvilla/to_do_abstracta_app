@@ -75,10 +75,6 @@ void main() {
     });
 
     test('should search tasks correctly', () async {
-      final tasks = [
-        testTask,
-        testTask.copyWith(id: '2', title: 'Another Task'),
-      ];
       when(mockRepository.searchTasks('Test'))
           .thenAnswer((_) async => [testTask]);
 
