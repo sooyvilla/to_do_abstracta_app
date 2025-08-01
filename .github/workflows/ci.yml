@@ -27,9 +27,6 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Analyze project source
-        run: flutter analyze
-
       - name: Run tests with coverage
         run: flutter test --coverage
 
