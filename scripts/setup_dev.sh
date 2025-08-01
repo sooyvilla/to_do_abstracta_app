@@ -16,7 +16,16 @@ fi
 
 # Verificar versión de Flutter
 echo "🔍 Verificando versión de Flutter..."
-flutter --version
+FLUTTER_VERSION=$(flutter --version | head -n1 | awk '{print $2}')
+REQUIRED_VERSION="3.32.8"
+
+echo "Flutter instalado: $FLUTTER_VERSION"
+echo "Versión requerida: $REQUIRED_VERSION"
+
+if [[ "$FLUTTER_VERSION" < "$REQUIRED_VERSION" ]]; then
+    echo "⚠️  Se recomienda actualizar Flutter a la versión $REQUIRED_VERSION o superior"
+    echo "💡 Ejecuta: flutter upgrade"
+fi
 
 # Instalar dependencias
 echo "📦 Instalando dependencias..."

@@ -14,7 +14,7 @@ Una aplicación de gestión de tareas moderna desarrollada en Flutter con funcio
 
 ## Tecnologías
 
-- **Flutter 3.27.0** - Framework de desarrollo
+- **Flutter 3.32.8** - Framework de desarrollo
 - **Riverpod** - Gestión de estado reactivo
 - **Hive** - Base de datos local NoSQL
 - **Google Gemini API** - Inteligencia artificial
@@ -42,7 +42,13 @@ Este proyecto utiliza **GitHub Actions** para automatización completa:
    - Ejecuta tests unitarios y de widgets
    - Análisis estático con Flutter analyzer
    - Verificación de cobertura (mínimo 80%)
-   - Builds de Android e iOS para validación
+   - Validación de formato de código
+
+2. **PR Quality Gate** (`.github/workflows/pr.yml`)
+   - Validación de título con Conventional Commits
+   - Verificación de descripción del PR
+   - Validación de convención de nombres de rama
+   - Requerimiento de revisión de contribuidor
 
 ### Protección de Rama
 
@@ -58,8 +64,8 @@ La rama `main` está protegida con las siguientes reglas:
 
 ### Prerrequisitos
 
-- Flutter 3.27.0 (canal stable)
-- Dart 3.6.0+
+- Flutter 3.32.8 (canal stable)
+- Dart 3.8.0+
 - Android Studio / VS Code
 - Git
 
@@ -145,7 +151,7 @@ El proyecto incluye scripts útiles en la carpeta `scripts/`:
    - ✅ Tests pasan
    - ✅ Cobertura ≥ 80%
    - ✅ Sin errores de análisis estático
-   - ✅ Build exitoso
+   - ✅ Formato de código correcto
 
 6. **Revisión y merge**: Requiere aprobación de al menos 1 revisor
 
@@ -162,3 +168,14 @@ El proyecto incluye scripts útiles en la carpeta `scripts/`:
 - `refactor:` Refactorización
 - `test:` Añadir tests
 - `chore:` Tareas de mantenimiento
+
+### Políticas de Pull Request
+
+Todos los PRs deben cumplir:
+
+1. **Título**: Formato Conventional Commits (`feat:`, `fix:`, etc.)
+2. **Descripción**: Mínimo 10 caracteres explicando los cambios
+3. **Estado**: No puede ser un draft PR
+4. **Revisión**: Al menos 1 aprobación de otro contribuidor
+5. **Calidad**: Pasar todos los checks de CI
+6. **Conversaciones**: Todas deben estar resueltas
