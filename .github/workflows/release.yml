@@ -1,0 +1,89 @@
+name: Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.0'
+          channel: 'stable'
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Run tests
+        run: flutter test
+        
+      - name: Build Android Release
+        run: |
+          flutter build apk --release
+          flutter build appbundle --release
+          
+      - name: Setup Java for Android signing
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - name: Build iOS Release
+        if: runner.os == 'macOS'
+        run: flutter build ios --release --no-codesign
+        
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          body: |
+            ## 🚀 Release ${{ steps.version.outputs.VERSION }}
+            
+            ### 📱 Downloads
+            - Android APK: See assets below
+            - Android Bundle: For Play Store deployment
+            
+            ### 🔄 Changes
+            See the [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+            
+            ### 📊 Coverage
+            Tests passing with coverage report available.
+            
+      - name: Upload Android APK
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-release.apk
+          asset_name: to-do-abstracta-${{ steps.version.outputs.VERSION }}.apk
+          asset_content_type: application/vnd.android.package-archive
+          
+      - name: Upload Android Bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/bundle/release/app-release.aab
+          asset_name: to-do-abstracta-${{ steps.version.outputs.VERSION }}.aab
+          asset_content_type: application/x-authorware-bin

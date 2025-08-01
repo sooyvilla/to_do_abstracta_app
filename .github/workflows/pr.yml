@@ -1,0 +1,94 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  pr-checks:
+    name: PR Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.0'
+          channel: 'stable'
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Validate PR Title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+            perf
+            ci
+            build
+          requireScope: false
+          
+      - name: Check code formatting
+        run: |
+          if ! dart format --set-exit-if-changed .; then
+            echo "❌ Code is not properly formatted"
+            echo "Run 'dart format .' to fix formatting issues"
+            exit 1
+          fi
+          echo "✅ Code formatting is correct"
+          
+      - name: Analyze code
+        run: |
+          flutter analyze
+          if [ $? -ne 0 ]; then
+            echo "❌ Code analysis failed"
+            exit 1
+          fi
+          echo "✅ Code analysis passed"
+          
+      - name: Run tests with coverage
+        run: |
+          flutter test --coverage
+          if [ $? -ne 0 ]; then
+            echo "❌ Tests failed"
+            exit 1
+          fi
+          echo "✅ All tests passed"
+          
+      - name: Check minimum coverage
+        run: |
+          ./scripts/check_coverage.sh
+          
+      - name: Comment PR with coverage
+        uses: 5monkeys/cobertura-action@master
+        with:
+          path: coverage/lcov.info
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          minimum_coverage: 80
+          fail_below_threshold: true
+          show_missing: true
+          
+      - name: Build verification
+        run: |
+          echo "🔨 Verifying build can succeed..."
+          flutter build apk --debug
+          if [ $? -eq 0 ]; then
+            echo "✅ Build verification passed"
+          else
+            echo "❌ Build verification failed"
+            exit 1
+          fi
