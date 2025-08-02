@@ -28,23 +28,3 @@ if (( $(echo "$COVERAGE < $MIN_COVERAGE" | awk '{print ($1 < $3)}') )); then
 fi
 
 echo "✅ Coverage check passed!"
-    echo "📋 Coverage details:"
-    lcov --list coverage/lcov.info
-    echo ""
-    echo "💡 Tips to improve coverage:"
-    echo "- Add tests for uncovered lines"
-    echo "- Review the HTML report in coverage/html/index.html"
-    echo "- Focus on core business logic and edge cases"
-    exit 1
-fi
-
-echo "✅ Coverage check passed! (${COVERAGE}%)"
-
-# Mostrar archivos con menor coverage
-echo ""
-echo "📊 Files with lowest coverage:"
-lcov --list coverage/lcov.info | sort -k2 -n | head -10
-
-echo ""
-echo "🎉 Coverage report generated successfully!"
-echo "📁 View detailed report: coverage/html/index.html"
