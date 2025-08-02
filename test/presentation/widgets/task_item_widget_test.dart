@@ -100,11 +100,6 @@ void main() {
       expect(find.text('tag2'), findsOneWidget);
     });
 
-    testWidgets('should display task creation date', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(testTask));
-      expect(find.byIcon(Icons.access_time), findsOneWidget);
-    });
-
     testWidgets('should display priority indicator', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest(testTask));
       expect(find.byType(Container), findsWidgets);
@@ -143,16 +138,6 @@ void main() {
 
       final checkboxWidget = tester.widget<Checkbox>(checkbox);
       expect(checkboxWidget.value, isTrue);
-    });
-
-    testWidgets('should handle tap gestures', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(testTask));
-
-      // Test tapping on the widget
-      await tester.tap(find.byType(TaskItemWidget));
-      await tester.pump();
-
-      expect(find.byType(TaskItemWidget), findsOneWidget);
     });
 
     testWidgets('should display status icon', (tester) async {

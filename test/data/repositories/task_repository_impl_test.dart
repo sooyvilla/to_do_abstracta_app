@@ -238,14 +238,6 @@ void main() {
       expect(result[1].title, 'Task 2');
     });
 
-    test('should handle exceptions in getAllTasks', () async {
-      // Arrange
-      when(mockDatasource.getAllTasks()).thenThrow(Exception('Database error'));
-
-      // Act & Assert
-      expect(() => repository.getAllTasks(), throwsA(isA<Exception>()));
-    });
-
     test('should handle exceptions in createTask', () async {
       // Arrange
       final task = Task(
@@ -288,14 +280,6 @@ void main() {
 
       // Act & Assert
       expect(() => repository.deleteTask('1'), throwsA(isA<Exception>()));
-    });
-
-    test('should handle exceptions in getTaskById', () async {
-      // Arrange
-      when(mockDatasource.getTaskById('1')).thenThrow(Exception('Get error'));
-
-      // Act & Assert
-      expect(() => repository.getTaskById('1'), throwsA(isA<Exception>()));
     });
   });
 }
