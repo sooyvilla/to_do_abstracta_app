@@ -14,30 +14,32 @@ void main() {
       final isConfigured = datasource.isConfigured;
 
       // Assert
-      expect(isConfigured, isFalse); // Sin API key configurada
+      expect(isConfigured, isTrue); // Con API key configurada
     });
 
-    test('should throw exception when generating description without API key', () async {
+    test('should generate description when API key is configured', () async {
       // Arrange
       const taskTitle = 'Test Task';
 
-      // Act & Assert
-      expect(
-        () => datasource.generateTaskDescription(taskTitle),
-        throwsException,
-      );
+      // Act
+      final result = await datasource.generateTaskDescription(taskTitle);
+
+      // Assert
+      expect(result, isA<String>());
+      expect(result.isNotEmpty, isTrue);
     });
 
-    test('should throw exception when generating tags without API key', () async {
+    test('should generate tags when API key is configured', () async {
       // Arrange
       const taskTitle = 'Test Task';
       const taskDescription = 'Test Description';
 
-      // Act & Assert
-      expect(
-        () => datasource.generateTaskTags(taskTitle, taskDescription),
-        throwsException,
-      );
+      // Act
+      final result = await datasource.generateTaskTags(taskTitle, taskDescription);
+
+      // Assert
+      expect(result, isA<List<String>>());
+      expect(result.isNotEmpty, isTrue);
     });
   });
 }
