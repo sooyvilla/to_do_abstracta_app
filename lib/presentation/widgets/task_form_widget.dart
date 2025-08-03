@@ -21,44 +21,58 @@ class TaskFormWidget extends ConsumerStatefulWidget {
 }
 
 class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
-  final textIaController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final titleController = TextEditingController();
-  final tagsController = TextEditingController();
-  final assignedUserController = TextEditingController();
-  final statusController = TextEditingController();
-  final priorityController = TextEditingController();
-  TaskStatus? valueStatus;
-  TaskPriority? valuePriority;
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _tagsController = TextEditingController();
+  final _assignedUserController = TextEditingController();
+
+  bool _isInitialized = false;
 
   @override
   void initState() {
+    super.initState();
     if (widget.task != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(taskFormProvider.notifier).loadTask(widget.task!);
+        _initializeControllers();
       });
-
-      titleController.text = widget.task!.title;
-      descriptionController.text = widget.task!.description;
-      tagsController.text = widget.task!.tags.join(', ');
-      assignedUserController.text = widget.task!.assignedUser;
-      statusController.text = widget.task!.status.label;
-      priorityController.text = widget.task!.priority.label;
-      valueStatus = widget.task!.status;
-      valuePriority = widget.task!.priority;
     }
-    super.initState();
+  }
+
+  void _initializeControllers() {
+    if (!_isInitialized && widget.task != null) {
+      final task = widget.task!;
+      _titleController.text = task.title;
+      _descriptionController.text = task.description;
+      _tagsController.text = task.tags.join(', ');
+      _assignedUserController.text = task.assignedUser;
+      _isInitialized = true;
+    }
+  }
+
+  void _syncControllersWithState(TaskFormState state) {
+    if (!_isInitialized) {
+      _descriptionController.text = state.description;
+      _tagsController.text = state.tags.join(', ');
+      _assignedUserController.text = state.assignedUser;
+    }
+  }
+
+  bool validateForm() {
+    return _formKey.currentState?.validate() ?? false;
+  }
+
+  TaskFormState getFormData() {
+    return ref.read(taskFormProvider);
   }
 
   @override
   void dispose() {
-    textIaController.dispose();
-    descriptionController.dispose();
-    titleController.dispose();
-    tagsController.dispose();
-    assignedUserController.dispose();
-    statusController.dispose();
-    priorityController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _tagsController.dispose();
+    _assignedUserController.dispose();
     super.dispose();
   }
 
@@ -67,178 +81,167 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
     final formState = ref.watch(taskFormProvider);
     final formNotifier = ref.read(taskFormProvider.notifier);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (formState.error != null) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+    _syncControllersWithState(formState);
+
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (formState.error != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                  formState.error!,
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
-              child: Text(
-                formState.error!,
-                style: const TextStyle(color: Colors.red),
+              const SizedBox(height: 16),
+            ],
+            TextFormField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Título *',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'El título es requerido';
+                }
+                return null;
+              },
+              onChanged: formNotifier.updateTitle,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: formState.isGeneratingDescription
+                        ? null
+                        : () async {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              final title = _titleController.text.trim();
+                              if (title.isNotEmpty) {
+                                await formNotifier
+                                    .generateCompleteTaskFromTitle(title);
+                              }
+                            }
+                          },
+                    icon: formState.isGeneratingDescription
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.auto_fix_high),
+                    label: Text(formState.isGeneratingDescription
+                        ? 'Generando...'
+                        : 'Autocompletar con IA'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 60, maxHeight: 300),
+              child: TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Descripción',
+                  border: OutlineInputBorder(),
+                ),
+                minLines: 1,
+                maxLines: null,
+                onChanged: formNotifier.updateDescription,
+                keyboardType: TextInputType.multiline,
               ),
             ),
             const SizedBox(height: 16),
-          ],
-          TextFormField(
-            controller: titleController,
-            decoration: const InputDecoration(
-              labelText: 'Título *',
-              border: OutlineInputBorder(),
-            ),
-            onChanged: formNotifier.updateTitle,
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.auto_awesome),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Generador de Descripción IA',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Ingresa un prompt y deja que la IA genere una descripción detallada para tu tarea.',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: textIaController,
-                          decoration: const InputDecoration(
-                            hintText:
-                                'ej. "Planificar reunión semanal del equipo"',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final prompt = textIaController.text.trim();
-                          final res =
-                              await formNotifier.generateDescription(prompt);
-                          if (res != null) {
-                            descriptionController.text = res;
-                            formNotifier.updateDescription(res);
-                            textIaController.clear();
-                          }
-                        },
-                        child: formState.isGeneratingDescription
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('Generar'),
-                      ),
-                    ],
-                  ),
-                ],
+            TextFormField(
+              controller: _tagsController,
+              decoration: const InputDecoration(
+                labelText: 'Etiquetas (separadas por comas)',
+                border: OutlineInputBorder(),
+                helperText: 'ej. trabajo, urgente, reunión',
               ),
+              onChanged: (value) {
+                final tags = value
+                    .split(',')
+                    .map((tag) => tag.trim())
+                    .where((tag) => tag.isNotEmpty)
+                    .toList();
+                formNotifier.updateTags(tags);
+              },
             ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'Descripción',
-              border: OutlineInputBorder(),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _assignedUserController,
+              decoration: const InputDecoration(
+                labelText: 'Usuario Asignado',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: formNotifier.updateAssignedUser,
             ),
-            maxLines: 4,
-            onChanged: formNotifier.updateDescription,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: tagsController,
-            decoration: const InputDecoration(
-              labelText: 'Etiquetas (separadas por comas)',
-              border: OutlineInputBorder(),
-              helperText: 'ej. trabajo, urgente, reunión',
+            const SizedBox(height: 16),
+            DropdownButtonFormField<TaskStatus>(
+              value: formState.status,
+              decoration: const InputDecoration(
+                labelText: 'Estado',
+                border: OutlineInputBorder(),
+              ),
+              items: TaskStatus.values.map((status) {
+                return DropdownMenuItem(
+                  value: status,
+                  child: Text(status.label),
+                );
+              }).toList(),
+              onChanged: (status) {
+                if (status != null) {
+                  formNotifier.updateStatus(status);
+                }
+              },
             ),
-            onChanged: (value) {
-              final tags = value
-                  .split(',')
-                  .map((tag) => tag.trim())
-                  .where((tag) => tag.isNotEmpty)
-                  .toList();
-              formNotifier.updateTags(tags);
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: assignedUserController,
-            decoration: const InputDecoration(
-              labelText: 'Usuario Asignado',
-              border: OutlineInputBorder(),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<TaskPriority>(
+              value: formState.priority,
+              decoration: const InputDecoration(
+                labelText: 'Prioridad',
+                border: OutlineInputBorder(),
+              ),
+              items: TaskPriority.values.map((priority) {
+                return DropdownMenuItem(
+                  value: priority,
+                  child: Row(
+                    children: [
+                      _buildPriorityIndicator(priority),
+                      const SizedBox(width: 8),
+                      Text(priority.label),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (priority) {
+                if (priority != null) {
+                  formNotifier.updatePriority(priority);
+                }
+              },
             ),
-            onChanged: formNotifier.updateAssignedUser,
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<TaskStatus>(
-            value: valueStatus,
-            decoration: const InputDecoration(
-              labelText: 'Estado',
-              border: OutlineInputBorder(),
-            ),
-            items: TaskStatus.values.map((status) {
-              return DropdownMenuItem(
-                value: status,
-                child: Text(status.label),
-              );
-            }).toList(),
-            onChanged: (status) {
-              if (status != null) {
-                formNotifier.updateStatus(status);
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<TaskPriority>(
-            value: valuePriority,
-            decoration: const InputDecoration(
-              labelText: 'Prioridad',
-              border: OutlineInputBorder(),
-            ),
-            items: TaskPriority.values.map((priority) {
-              return DropdownMenuItem(
-                value: priority,
-                child: Row(
-                  children: [
-                    _buildPriorityIndicator(priority),
-                    const SizedBox(width: 8),
-                    Text(priority.label),
-                  ],
-                ),
-              );
-            }).toList(),
-            onChanged: (priority) {
-              if (priority != null) {
-                formNotifier.updatePriority(priority);
-              }
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

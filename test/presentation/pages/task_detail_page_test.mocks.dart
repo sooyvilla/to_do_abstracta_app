@@ -3,12 +3,12 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i6;
-import 'package:to_do_abstracta_app/domain/entities/task.dart' as _i4;
-import 'package:to_do_abstracta_app/domain/usecases/llm_usecases.dart' as _i5;
+import 'package:to_do_abstracta_app/domain/entities/task.dart' as _i5;
+import 'package:to_do_abstracta_app/domain/models/task_form_data.dart' as _i3;
+import 'package:to_do_abstracta_app/domain/usecases/llm_usecases.dart' as _i6;
 import 'package:to_do_abstracta_app/domain/usecases/task_usecases.dart' as _i2;
 
 // ignore_for_file: type=lint
@@ -36,6 +36,16 @@ class _FakeTaskStatistics_0 extends _i1.SmartFake
         );
 }
 
+class _FakeTaskFormData_1 extends _i1.SmartFake implements _i3.TaskFormData {
+  _FakeTaskFormData_1(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [TaskUsecases].
 ///
 /// See the documentation for Mockito's code generation for more information.
@@ -45,101 +55,101 @@ class MockTaskUsecases extends _i1.Mock implements _i2.TaskUsecases {
   }
 
   @override
-  _i3.Future<List<_i4.Task>> getAllTasks() => (super.noSuchMethod(
+  _i4.Future<List<_i5.Task>> getAllTasks() => (super.noSuchMethod(
         Invocation.method(
           #getAllTasks,
           [],
         ),
-        returnValue: _i3.Future<List<_i4.Task>>.value(<_i4.Task>[]),
-      ) as _i3.Future<List<_i4.Task>>);
+        returnValue: _i4.Future<List<_i5.Task>>.value(<_i5.Task>[]),
+      ) as _i4.Future<List<_i5.Task>>);
 
   @override
-  _i3.Future<_i4.Task?> getTaskById(String? id) => (super.noSuchMethod(
+  _i4.Future<_i5.Task?> getTaskById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getTaskById,
           [id],
         ),
-        returnValue: _i3.Future<_i4.Task?>.value(),
-      ) as _i3.Future<_i4.Task?>);
+        returnValue: _i4.Future<_i5.Task?>.value(),
+      ) as _i4.Future<_i5.Task?>);
 
   @override
-  _i3.Future<void> createTask(_i4.Task? task) => (super.noSuchMethod(
+  _i4.Future<void> createTask(_i5.Task? task) => (super.noSuchMethod(
         Invocation.method(
           #createTask,
           [task],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> updateTask(_i4.Task? task) => (super.noSuchMethod(
+  _i4.Future<void> updateTask(_i5.Task? task) => (super.noSuchMethod(
         Invocation.method(
           #updateTask,
           [task],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> deleteTask(String? id) => (super.noSuchMethod(
+  _i4.Future<void> deleteTask(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteTask,
           [id],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> toggleTaskStatus(String? id) => (super.noSuchMethod(
+  _i4.Future<void> toggleTaskStatus(String? id) => (super.noSuchMethod(
         Invocation.method(
           #toggleTaskStatus,
           [id],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<_i2.TaskStatistics> getTaskStatistics() => (super.noSuchMethod(
+  _i4.Future<_i2.TaskStatistics> getTaskStatistics() => (super.noSuchMethod(
         Invocation.method(
           #getTaskStatistics,
           [],
         ),
-        returnValue: _i3.Future<_i2.TaskStatistics>.value(_FakeTaskStatistics_0(
+        returnValue: _i4.Future<_i2.TaskStatistics>.value(_FakeTaskStatistics_0(
           this,
           Invocation.method(
             #getTaskStatistics,
             [],
           ),
         )),
-      ) as _i3.Future<_i2.TaskStatistics>);
+      ) as _i4.Future<_i2.TaskStatistics>);
 
   @override
-  _i3.Stream<List<_i4.Task>> watchTasks() => (super.noSuchMethod(
+  _i4.Stream<List<_i5.Task>> watchTasks() => (super.noSuchMethod(
         Invocation.method(
           #watchTasks,
           [],
         ),
-        returnValue: _i3.Stream<List<_i4.Task>>.empty(),
-      ) as _i3.Stream<List<_i4.Task>>);
+        returnValue: _i4.Stream<List<_i5.Task>>.empty(),
+      ) as _i4.Stream<List<_i5.Task>>);
 
   @override
-  _i3.Future<List<_i4.Task>> searchTasks(String? query) => (super.noSuchMethod(
+  _i4.Future<List<_i5.Task>> searchTasks(String? query) => (super.noSuchMethod(
         Invocation.method(
           #searchTasks,
           [query],
         ),
-        returnValue: _i3.Future<List<_i4.Task>>.value(<_i4.Task>[]),
-      ) as _i3.Future<List<_i4.Task>>);
+        returnValue: _i4.Future<List<_i5.Task>>.value(<_i5.Task>[]),
+      ) as _i4.Future<List<_i5.Task>>);
 }
 
 /// A class which mocks [LLMUsecases].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLLMUsecases extends _i1.Mock implements _i5.LLMUsecases {
+class MockLLMUsecases extends _i1.Mock implements _i6.LLMUsecases {
   MockLLMUsecases() {
     _i1.throwOnMissingStub(this);
   }
@@ -151,34 +161,18 @@ class MockLLMUsecases extends _i1.Mock implements _i5.LLMUsecases {
       ) as bool);
 
   @override
-  _i3.Future<String> generateTaskDescription(String? prompt) =>
+  _i4.Future<_i3.TaskFormData> generateCompleteTaskFromTitle(String? title) =>
       (super.noSuchMethod(
         Invocation.method(
-          #generateTaskDescription,
-          [prompt],
+          #generateCompleteTaskFromTitle,
+          [title],
         ),
-        returnValue: _i3.Future<String>.value(_i6.dummyValue<String>(
+        returnValue: _i4.Future<_i3.TaskFormData>.value(_FakeTaskFormData_1(
           this,
           Invocation.method(
-            #generateTaskDescription,
-            [prompt],
+            #generateCompleteTaskFromTitle,
+            [title],
           ),
         )),
-      ) as _i3.Future<String>);
-
-  @override
-  _i3.Future<List<String>> generateTaskTags(
-    String? title,
-    String? description,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #generateTaskTags,
-          [
-            title,
-            description,
-          ],
-        ),
-        returnValue: _i3.Future<List<String>>.value(<String>[]),
-      ) as _i3.Future<List<String>>);
+      ) as _i4.Future<_i3.TaskFormData>);
 }

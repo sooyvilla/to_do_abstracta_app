@@ -160,6 +160,39 @@ class TaskFormNotifier extends StateNotifier<TaskFormState> {
     state = state.copyWith(title: title);
   }
 
+  Future<void> generateCompleteTaskFromTitle(String title) async {
+    if (title.isEmpty) return;
+
+    if (!_llmUsecases.isConfigured) {
+      state = state.copyWith(
+        error:
+            'Gemini API key not configured. Please set up your API key in the code to use AI features.',
+      );
+      return;
+    }
+
+    state = state.copyWith(isGeneratingDescription: true, error: null);
+
+    try {
+      final taskData = await _llmUsecases.generateCompleteTaskFromTitle(title);
+      state = state.copyWith(
+        description: taskData.description,
+        tags: taskData.tags,
+        status: taskData.status,
+        priority: taskData.priority,
+        assignedUser: taskData.assignedUser,
+        isGeneratingDescription: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        error: e.toString().contains('API key not configured')
+            ? 'Gemini API key not configured. Please set up your API key to use AI features.'
+            : 'Failed to generate complete task: $e',
+        isGeneratingDescription: false,
+      );
+    }
+  }
+
   void updateDescription(String description) {
     state = state.copyWith(description: description);
   }
@@ -178,36 +211,6 @@ class TaskFormNotifier extends StateNotifier<TaskFormState> {
 
   void updatePriority(TaskPriority priority) {
     state = state.copyWith(priority: priority);
-  }
-
-  Future<String?> generateDescription(String prompt) async {
-    if (prompt.isEmpty) return null;
-
-    if (!_llmUsecases.isConfigured) {
-      state = state.copyWith(
-        error:
-            'Gemini API key not configured. Please set up your API key in the code to use AI features.',
-      );
-      return null;
-    }
-
-    state = state.copyWith(isGeneratingDescription: true, error: null);
-
-    try {
-      final response = await _llmUsecases.generateTaskDescription(prompt);
-      state = state.copyWith(
-        isGeneratingDescription: false,
-      );
-      return response;
-    } catch (e) {
-      state = state.copyWith(
-        error: e.toString().contains('API key not configured')
-            ? 'Gemini API key not configured. Please set up your API key to use AI features.'
-            : 'Failed to generate description: $e',
-        isGeneratingDescription: false,
-      );
-      return null;
-    }
   }
 
   Future<bool> saveTask({String? taskId}) async {

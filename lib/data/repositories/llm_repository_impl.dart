@@ -1,4 +1,5 @@
 import 'package:to_do_abstracta_app/data/datasources/llm_datasource.dart';
+import 'package:to_do_abstracta_app/domain/models/task_form_data.dart';
 import 'package:to_do_abstracta_app/domain/repositories/llm_repository.dart';
 
 /// Implementación del repositorio LLM.
@@ -12,13 +13,22 @@ class LLMRepositoryImpl implements LLMRepository {
   LLMRepositoryImpl(this._llmDatasource);
 
   @override
+  @Deprecated(
+      'Este método esta obsoleto. Usa generateCompleteTaskFromTitle para obtener una tarea completa.')
   Future<String> generateTaskDescription(String prompt) {
     return _llmDatasource.generateTaskDescription(prompt);
   }
 
   @override
+  @Deprecated(
+      'Este método esta obsoleto. Usa generateCompleteTaskFromTitle para obtener etiquetas junto con otros datos de la tarea.')
   Future<List<String>> generateTaskTags(String title, String description) {
     return _llmDatasource.generateTaskTags(title, description);
+  }
+
+  @override
+  Future<TaskFormData> generateCompleteTaskFromTitle(String title) {
+    return _llmDatasource.generateCompleteTaskFromTitle(title);
   }
 
   @override

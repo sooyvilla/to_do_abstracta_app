@@ -4,7 +4,6 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:to_do_abstracta_app/data/datasources/local_task_datasource.dart';
 import 'package:to_do_abstracta_app/data/models/task_model.dart';
-import 'package:to_do_abstracta_app/domain/entities/task.dart';
 
 import 'local_task_datasource_test.mocks.dart';
 

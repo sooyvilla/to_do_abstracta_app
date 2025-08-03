@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:to_do_abstracta_app/core/extensions/task_extensions.dart';
+import 'package:to_do_abstracta_app/data/models/task_model.dart';
 import 'package:to_do_abstracta_app/presentation/providers/task_providers.dart';
 
 /// Widget que muestra estadísticas visuales de las tareas.
@@ -63,7 +65,7 @@ class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
                 Expanded(
                   child: _buildStatCard(
                     context,
-                    'Completadas',
+                    TaskStatus.completed.label,
                     statistics.completed.toString(),
                     Icons.check_circle,
                     Colors.green,
@@ -77,7 +79,7 @@ class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
                 Expanded(
                   child: _buildStatCard(
                     context,
-                    'Pendientes',
+                    TaskStatus.pending.label,
                     statistics.pending.toString(),
                     Icons.pending,
                     Colors.orange,
@@ -87,7 +89,7 @@ class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
                 Expanded(
                   child: _buildStatCard(
                     context,
-                    'En Progreso',
+                    TaskStatus.inProgress.label,
                     statistics.inProgress.toString(),
                     Icons.hourglass_empty,
                     Colors.purple,
@@ -144,7 +146,7 @@ class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
                     const SizedBox(height: 16),
                     _buildDistributionBar(
                       context,
-                      'Completadas',
+                      TaskStatus.completed.label,
                       statistics.completed,
                       statistics.total,
                       Colors.green,
@@ -152,7 +154,7 @@ class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
                     const SizedBox(height: 12),
                     _buildDistributionBar(
                       context,
-                      'Pendientes',
+                      TaskStatus.pending.label,
                       statistics.pending,
                       statistics.total,
                       Colors.orange,
@@ -160,7 +162,7 @@ class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
                     const SizedBox(height: 12),
                     _buildDistributionBar(
                       context,
-                      'En Progreso',
+                      TaskStatus.inProgress.label,
                       statistics.inProgress,
                       statistics.total,
                       Colors.purple,
@@ -168,7 +170,7 @@ class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
                     const SizedBox(height: 12),
                     _buildDistributionBar(
                       context,
-                      'Canceladas',
+                      TaskStatus.cancelled.label,
                       statistics.cancelled,
                       statistics.total,
                       Colors.red,

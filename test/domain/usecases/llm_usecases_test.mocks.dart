@@ -3,12 +3,13 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i4;
+import 'package:mockito/src/dummies.dart' as _i5;
+import 'package:to_do_abstracta_app/domain/models/task_form_data.dart' as _i2;
 import 'package:to_do_abstracta_app/domain/repositories/llm_repository.dart'
-    as _i2;
+    as _i3;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -24,10 +25,20 @@ import 'package:to_do_abstracta_app/domain/repositories/llm_repository.dart'
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
+class _FakeTaskFormData_0 extends _i1.SmartFake implements _i2.TaskFormData {
+  _FakeTaskFormData_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [LLMRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLLMRepository extends _i1.Mock implements _i2.LLMRepository {
+class MockLLMRepository extends _i1.Mock implements _i3.LLMRepository {
   MockLLMRepository() {
     _i1.throwOnMissingStub(this);
   }
@@ -39,23 +50,23 @@ class MockLLMRepository extends _i1.Mock implements _i2.LLMRepository {
       ) as bool);
 
   @override
-  _i3.Future<String> generateTaskDescription(String? prompt) =>
+  _i4.Future<String> generateTaskDescription(String? prompt) =>
       (super.noSuchMethod(
         Invocation.method(
           #generateTaskDescription,
           [prompt],
         ),
-        returnValue: _i3.Future<String>.value(_i4.dummyValue<String>(
+        returnValue: _i4.Future<String>.value(_i5.dummyValue<String>(
           this,
           Invocation.method(
             #generateTaskDescription,
             [prompt],
           ),
         )),
-      ) as _i3.Future<String>);
+      ) as _i4.Future<String>);
 
   @override
-  _i3.Future<List<String>> generateTaskTags(
+  _i4.Future<List<String>> generateTaskTags(
     String? title,
     String? description,
   ) =>
@@ -67,6 +78,22 @@ class MockLLMRepository extends _i1.Mock implements _i2.LLMRepository {
             description,
           ],
         ),
-        returnValue: _i3.Future<List<String>>.value(<String>[]),
-      ) as _i3.Future<List<String>>);
+        returnValue: _i4.Future<List<String>>.value(<String>[]),
+      ) as _i4.Future<List<String>>);
+
+  @override
+  _i4.Future<_i2.TaskFormData> generateCompleteTaskFromTitle(String? title) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #generateCompleteTaskFromTitle,
+          [title],
+        ),
+        returnValue: _i4.Future<_i2.TaskFormData>.value(_FakeTaskFormData_0(
+          this,
+          Invocation.method(
+            #generateCompleteTaskFromTitle,
+            [title],
+          ),
+        )),
+      ) as _i4.Future<_i2.TaskFormData>);
 }
