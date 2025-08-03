@@ -34,7 +34,7 @@ class LLMDatasourceImpl implements LLMDatasource {
   static const String _baseUrl =
       'https://generativelanguage.googleapis.com/v1beta';
   // !Insertar llave de acceso de Gemini
-  static const String _apiKey = 'AIzaSyC1Hd2fJgVybUmPRqVj2AF7soVTVRNzp5Q';
+  static const String _apiKey = '';
 
   @override
   bool get isConfigured => _apiKey.isNotEmpty;
