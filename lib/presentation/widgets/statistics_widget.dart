@@ -7,11 +7,34 @@ import 'package:to_do_abstracta_app/presentation/providers/task_providers.dart';
 /// Presenta métricas como total de tareas, tareas completadas,
 /// pendientes, en progreso y canceladas. Incluye una barra de
 /// progreso para la tasa de completación y gráficos visuales.
-class StatisticsWidget extends ConsumerWidget {
+class StatisticsWidget extends ConsumerStatefulWidget {
   const StatisticsWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatisticsWidget> createState() => _StatisticsWidgetState();
+}
+
+class _StatisticsWidgetState extends ConsumerState<StatisticsWidget>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(taskStatisticsProvider);
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(taskStatisticsProvider);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final statisticsAsync = ref.watch(taskStatisticsProvider);
 
     return statisticsAsync.when(
@@ -126,7 +149,7 @@ class StatisticsWidget extends ConsumerWidget {
                       statistics.total,
                       Colors.green,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     _buildDistributionBar(
                       context,
                       'Pendientes',
@@ -134,7 +157,7 @@ class StatisticsWidget extends ConsumerWidget {
                       statistics.total,
                       Colors.orange,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     _buildDistributionBar(
                       context,
                       'En Progreso',
@@ -142,7 +165,7 @@ class StatisticsWidget extends ConsumerWidget {
                       statistics.total,
                       Colors.purple,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     _buildDistributionBar(
                       context,
                       'Canceladas',
@@ -234,32 +257,29 @@ class StatisticsWidget extends ConsumerWidget {
   ) {
     final percentage = total > 0 ? count / total : 0.0;
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Text(
+              count.toString(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
         ),
-        Expanded(
-          child: LinearProgressIndicator(
-            value: percentage,
-            backgroundColor: Colors.grey.withValues(alpha: 0.3),
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 40,
-          child: Text(
-            count.toString(),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.end,
-          ),
+        const SizedBox(height: 4),
+        LinearProgressIndicator(
+          value: percentage,
+          backgroundColor: Colors.grey.withValues(alpha: 0.3),
+          valueColor: AlwaysStoppedAnimation<Color>(color),
         ),
       ],
     );
