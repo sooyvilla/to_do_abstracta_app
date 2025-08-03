@@ -1,6 +1,6 @@
 # CHANGELOG
 
-# [1.1.0+2] 31-Jul-2025 (Sebastian Villa)
+# [1.1.0+2] 3-Ago-2025 (Sebastian Villa)
 
 ## Features
 - Se modifico la forma en la que se nuestra la distribucion de tareas en estadisiticas
