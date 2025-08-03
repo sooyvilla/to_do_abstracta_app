@@ -1,5 +1,13 @@
 # CHANGELOG
 
+# [1.1.0+2] 3-Ago-2025 (Sebastian Villa)
+
+## Features
+- Se modifico la forma en la que se nuestra la distribucion de tareas en estadisiticas
+
+## Fix
+- Se arreglo bug que no actualizaba las estadisticas cuando se habia cargado anteriormente
+
 # [1.0.0+1] 31-Jul-2025 (Sebastian Villa)
 
 ## Features
