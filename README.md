@@ -13,15 +13,20 @@ Una aplicación de gestión de tareas desarrollada en Flutter con funcionalidade
 
 ## Demostración
 
-### Android
-<div align="center">
-  <img src="assets/demo/android_demo" alt="Demo Android" width="300" />
+### iOS
+<div align="left">
+  <a href="https://streamable.com/bynupi">
+    <img src="https://img.shields.io/badge/📱_Ver_Demo_iOS-FF6B6B?style=for-the-badge&logo=apple&logoColor=white" alt="Demo iOS"/>
+  </a>
 </div>
 
-### iOS
-<div align="center">
-  <img src="assets/demo/ios_demo" alt="Demo iOS" width="300" />
+### Android
+<div align="left">
+  <a href="https://streamable.com/hybben">
+    <img src="https://img.shields.io/badge/%F0%9F%A4%96_Ver_Demo_Android-gray?style=for-the-badge&logo=android&logoColor=white" alt="Demo Android"/>
+  </a>
 </div>
+
 
 ## Tecnologías
 
