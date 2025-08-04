@@ -1,9 +1,14 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:to_do_abstracta_app/core/extensions/task_extensions.dart';
 import 'package:to_do_abstracta_app/data/models/task_model.dart';
 import 'package:to_do_abstracta_app/domain/entities/task.dart';
 import 'package:to_do_abstracta_app/presentation/providers/task_providers.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_dropdown.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_widgets.dart';
 
 /// Widget de formulario para crear y editar tareas.
 ///
@@ -106,12 +111,9 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
               ),
               const SizedBox(height: 16),
             ],
-            TextFormField(
+            _buildPlatformTextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Título *',
-                border: OutlineInputBorder(),
-              ),
+              labelText: 'Título *',
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'El título es requerido';
@@ -124,9 +126,14 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: PlatformButton.primary(
+                    text: formState.isGeneratingDescription
+                        ? 'Generando...'
+                        : 'Autocompletar con IA',
+                    icon: Icons.auto_fix_high,
+                    isLoading: formState.isGeneratingDescription,
                     onPressed: formState.isGeneratingDescription
-                        ? null
+                        ? () {}
                         : () async {
                             if (_formKey.currentState?.validate() ?? false) {
                               final title = _titleController.text.trim();
@@ -136,21 +143,6 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
                               }
                             }
                           },
-                    icon: formState.isGeneratingDescription
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.auto_fix_high),
-                    label: Text(formState.isGeneratingDescription
-                        ? 'Generando...'
-                        : 'Autocompletar con IA'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onSecondary,
-                    ),
                   ),
                 ),
               ],
@@ -158,26 +150,19 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
             const SizedBox(height: 16),
             ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 60, maxHeight: 300),
-              child: TextFormField(
+              child: _buildPlatformTextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Descripción',
-                  border: OutlineInputBorder(),
-                ),
-                minLines: 1,
-                maxLines: null,
+                labelText: 'Descripción',
+                hintText: 'Describe la tarea...',
+                maxLines: 5,
                 onChanged: formNotifier.updateDescription,
-                keyboardType: TextInputType.multiline,
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            _buildPlatformTextField(
               controller: _tagsController,
-              decoration: const InputDecoration(
-                labelText: 'Etiquetas (separadas por comas)',
-                border: OutlineInputBorder(),
-                helperText: 'ej. trabajo, urgente, reunión',
-              ),
+              labelText: 'Etiquetas (separadas por comas)',
+              hintText: 'ej. trabajo, urgente, reunión',
               onChanged: (value) {
                 final tags = value
                     .split(',')
@@ -188,24 +173,24 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
               },
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            _buildPlatformTextField(
               controller: _assignedUserController,
-              decoration: const InputDecoration(
-                labelText: 'Usuario Asignado',
-                border: OutlineInputBorder(),
-              ),
+              labelText: 'Usuario Asignado',
+              hintText: 'Ingresa el usuario asignado',
               onChanged: formNotifier.updateAssignedUser,
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<TaskStatus>(
+            PlatformDropdown<TaskStatus>(
               value: formState.status,
+              hint: 'Estado',
               decoration: const InputDecoration(
                 labelText: 'Estado',
                 border: OutlineInputBorder(),
               ),
               items: TaskStatus.values.map((status) {
-                return DropdownMenuItem(
+                return PlatformDropdownItem(
                   value: status,
+                  title: status.label,
                   child: Text(status.label),
                 );
               }).toList(),
@@ -216,15 +201,17 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
               },
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<TaskPriority>(
+            PlatformDropdown<TaskPriority>(
               value: formState.priority,
+              hint: 'Prioridad',
               decoration: const InputDecoration(
                 labelText: 'Prioridad',
                 border: OutlineInputBorder(),
               ),
               items: TaskPriority.values.map((priority) {
-                return DropdownMenuItem(
+                return PlatformDropdownItem(
                   value: priority,
+                  title: priority.label,
                   child: Row(
                     children: [
                       _buildPriorityIndicator(priority),
@@ -257,5 +244,56 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
         shape: BoxShape.circle,
       ),
     );
+  }
+
+  Widget _buildPlatformTextField({
+    required TextEditingController controller,
+    required String labelText,
+    String? hintText,
+    String? Function(String?)? validator,
+    void Function(String)? onChanged,
+    int maxLines = 1,
+  }) {
+    if (Platform.isIOS) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            labelText,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          CupertinoTextField(
+            controller: controller,
+            placeholder: hintText ?? labelText.replaceAll(' *', ''),
+            maxLines: maxLines,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: CupertinoColors.systemGrey4,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            onChanged: onChanged,
+          ),
+        ],
+      );
+    } else {
+      return TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          border: const OutlineInputBorder(),
+        ),
+        validator: validator,
+        onChanged: onChanged,
+        maxLines: maxLines,
+      );
+    }
   }
 }

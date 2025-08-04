@@ -18,19 +18,19 @@ void main() {
     testWidgets('should display search button initially', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      expect(find.text('Buscar tareas'), findsOneWidget);
       expect(find.byIcon(Icons.search), findsOneWidget);
+      expect(find.byType(GestureDetector), findsOneWidget);
     });
 
     testWidgets('should transform into search field when button is pressed',
         (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Buscar tareas...'), findsOneWidget);
+      expect(find.byIcon(Icons.search), findsOneWidget);
       expect(find.byIcon(Icons.close), findsOneWidget);
     });
 
@@ -38,21 +38,21 @@ void main() {
         (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsNothing);
-      expect(find.text('Buscar tareas'), findsOneWidget);
+      expect(find.byIcon(Icons.search), findsOneWidget);
     });
 
     testWidgets('should show clear button when text is entered',
         (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), 'test query');
@@ -65,7 +65,7 @@ void main() {
         (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'test query');
       await tester.pump();
@@ -80,7 +80,7 @@ void main() {
     testWidgets('should handle text changes correctly', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
       // Enter text in search field
@@ -94,7 +94,7 @@ void main() {
         (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), 'some text');
@@ -107,7 +107,7 @@ void main() {
         (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
       // TextField should be empty initially
@@ -117,7 +117,7 @@ void main() {
     testWidgets('should handle focus and cursor positioning', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
-      await tester.tap(find.text('Buscar tareas'));
+      await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
       final textField = find.byType(TextField);

@@ -25,6 +25,7 @@ void main() {
           .thenAnswer((_) async => expectedDescription);
 
       // Act
+      // ignore: deprecated_member_use_from_same_package
       final result = await repository.generateTaskDescription(prompt);
 
       // Assert
@@ -41,6 +42,7 @@ void main() {
           .thenAnswer((_) async => expectedTags);
 
       // Act
+      // ignore: deprecated_member_use_from_same_package
       final result = await repository.generateTaskTags(title, description);
 
       // Assert

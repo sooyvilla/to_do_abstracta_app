@@ -17,12 +17,42 @@ class SearchBarWidget extends ConsumerStatefulWidget {
   ConsumerState<SearchBarWidget> createState() => _SearchBarWidgetState();
 }
 
-class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
+class _SearchBarWidgetState extends ConsumerState<SearchBarWidget>
+    with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.elasticOut,
+    ));
+  }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -30,15 +60,17 @@ class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
 
   void _toggleSearch() {
     final isVisible = ref.read(searchVisibilityProvider);
-
     if (isVisible) {
-      _focusNode.unfocus();
-      _searchController.clear();
-      ref.read(searchQueryProvider.notifier).state = '';
-      ref.read(searchVisibilityProvider.notifier).state = false;
+      _animationController.reverse().then((_) {
+        _focusNode.unfocus();
+        _searchController.clear();
+        ref.read(searchQueryProvider.notifier).state = '';
+        ref.read(searchVisibilityProvider.notifier).state = false;
+      });
     } else {
       ref.read(searchVisibilityProvider.notifier).state = true;
-      Future.delayed(const Duration(milliseconds: 100), () {
+      _animationController.forward();
+      Future.delayed(const Duration(milliseconds: 200), () {
         _focusNode.requestFocus();
       });
     }
@@ -48,69 +80,61 @@ class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
   Widget build(BuildContext context) {
     final searchQuery = ref.watch(searchQueryProvider);
     final isSearchVisible = ref.watch(searchVisibilityProvider);
-    final isIOS = Platform.isIOS;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return ScaleTransition(
-            scale: animation,
-            child: child,
-          );
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          if (isSearchVisible) {
+            return _buildSearchField(searchQuery);
+          } else {
+            return _buildSearchButton();
+          }
         },
-        child: isSearchVisible
-            ? (isIOS
-                ? _buildCupertinoSearchField(searchQuery)
-                : _buildMaterialSearchField(searchQuery))
-            : (isIOS
-                ? _buildCupertinoSearchButton()
-                : _buildMaterialSearchButton()),
       ),
     );
   }
 
-  Widget _buildMaterialSearchButton() {
-    return SizedBox(
-      key: const ValueKey('searchButton'),
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: _toggleSearch,
-        icon: const Icon(Icons.search),
-        label: const Text('Buscar tareas'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
-        ),
-      ),
-    );
-  }
+  Widget _buildSearchButton() {
+    final isIOS = Platform.isIOS;
 
-  Widget _buildCupertinoSearchButton() {
-    return SizedBox(
-      key: const ValueKey('searchButtonCupertino'),
-      width: double.infinity,
-      child: CupertinoButton.filled(
-        onPressed: _toggleSearch,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        borderRadius: BorderRadius.circular(12),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              CupertinoIcons.search,
-              color: CupertinoColors.white,
+    return GestureDetector(
+      onTap: _toggleSearch,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 44,
+        decoration: BoxDecoration(
+          color: isIOS
+              ? CupertinoColors.systemFill
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            SizedBox(width: 8),
+          ],
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(
+              isIOS ? CupertinoIcons.search : Icons.search,
+              color: isIOS
+                  ? CupertinoColors.systemGrey
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
             Text(
-              'Buscar tareas',
+              'Buscar tareas...',
               style: TextStyle(
-                color: CupertinoColors.white,
-                fontWeight: FontWeight.w600,
+                color: isIOS
+                    ? CupertinoColors.systemGrey
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 16,
               ),
             ),
           ],
@@ -119,79 +143,119 @@ class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
     );
   }
 
-  Widget _buildMaterialSearchField(String searchQuery) {
-    return TextField(
-      key: const ValueKey('searchField'),
+  Widget _buildSearchField(String searchQuery) {
+    final isIOS = Platform.isIOS;
+
+    return Transform.scale(
+      scale: _scaleAnimation.value,
+      child: Opacity(
+        opacity: _fadeAnimation.value,
+        child: Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: isIOS
+                ? CupertinoColors.systemBackground
+                : Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: isIOS
+                  ? CupertinoColors.systemGrey4
+                  : Theme.of(context).colorScheme.outline,
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 16),
+              Icon(
+                isIOS ? CupertinoIcons.search : Icons.search,
+                color: isIOS
+                    ? CupertinoColors.systemGrey
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: isIOS
+                    ? _buildCupertinoTextField()
+                    : _buildMaterialTextField(),
+              ),
+              if (searchQuery.isNotEmpty) ...[
+                GestureDetector(
+                  onTap: () {
+                    _searchController.clear();
+                    ref.read(searchQueryProvider.notifier).state = '';
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(
+                      isIOS ? CupertinoIcons.xmark_circle_fill : Icons.clear,
+                      color: isIOS
+                          ? CupertinoColors.systemGrey
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ],
+              GestureDetector(
+                onTap: _toggleSearch,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    isIOS ? CupertinoIcons.xmark : Icons.close,
+                    color: isIOS
+                        ? CupertinoColors.systemGrey
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCupertinoTextField() {
+    return CupertinoTextField(
       controller: _searchController,
       focusNode: _focusNode,
-      decoration: InputDecoration(
-        hintText: 'Buscar tareas...',
-        prefixIcon: const Icon(Icons.search),
-        suffixIcon: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (searchQuery.isNotEmpty)
-              IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  _searchController.clear();
-                  ref.read(searchQueryProvider.notifier).state = '';
-                },
-              ),
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: _toggleSearch,
-            ),
-          ],
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        filled: true,
-        fillColor: Theme.of(context).colorScheme.surface,
+      placeholder: 'Buscar...',
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
       ),
+      style: const TextStyle(fontSize: 16),
       onChanged: (value) {
         ref.read(searchQueryProvider.notifier).state = value;
       },
     );
   }
 
-  Widget _buildCupertinoSearchField(String searchQuery) {
-    return Row(
-      key: const ValueKey('searchFieldCupertino'),
-      children: [
-        Expanded(
-          child: CupertinoSearchTextField(
-            controller: _searchController,
-            focusNode: _focusNode,
-            placeholder: 'Buscar tareas...',
-            style: CupertinoTheme.of(context).textTheme.textStyle,
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGroupedBackground,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: CupertinoColors.systemGrey4,
-              ),
-            ),
-            onChanged: (value) {
-              ref.read(searchQueryProvider.notifier).state = value;
-            },
-            onSuffixTap: () {
-              _searchController.clear();
-              ref.read(searchQueryProvider.notifier).state = '';
-            },
-          ),
-        ),
-        const SizedBox(width: 8),
-        CupertinoButton(
-          padding: const EdgeInsets.all(8),
-          onPressed: _toggleSearch,
-          child: const Icon(
-            CupertinoIcons.xmark_circle_fill,
-            color: CupertinoColors.systemGrey,
-          ),
-        ),
-      ],
+  Widget _buildMaterialTextField() {
+    return TextField(
+      controller: _searchController,
+      focusNode: _focusNode,
+      decoration: const InputDecoration(
+        hintText: 'Buscar...',
+        border: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+      ),
+      style: const TextStyle(fontSize: 16),
+      onChanged: (value) {
+        ref.read(searchQueryProvider.notifier).state = value;
+      },
     );
   }
 }

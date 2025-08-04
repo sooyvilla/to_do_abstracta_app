@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:to_do_abstracta_app/core/di/injection.dart';
-import 'package:to_do_abstracta_app/core/extensions/task_extensions.dart';
-import 'package:to_do_abstracta_app/data/models/task_model.dart';
 import 'package:to_do_abstracta_app/domain/entities/task.dart';
 import 'package:to_do_abstracta_app/presentation/pages/task_detail_page.dart';
-import 'package:to_do_abstracta_app/presentation/pages/task_form_page.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_chips.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_factory.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_navigation.dart';
 
 /// Widget que representa un elemento individual de tarea en la lista.
 ///
@@ -34,11 +34,9 @@ class TaskItemWidget extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          Navigator.push(
+          PlatformNavigation.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => TaskDetailPage(initialTask: task),
-            ),
+            TaskDetailPage(initialTask: task),
           );
         },
         child: Padding(
@@ -88,64 +86,50 @@ class TaskItemWidget extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  _buildPriorityIndicator(task.priority, theme),
-                  PopupMenuButton<String>(
-                    onSelected: (value) async {
-                      switch (value) {
-                        case 'edit':
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TaskFormPage(task: task),
-                            ),
-                          );
-                          break;
-                        case 'delete':
-                          await ref
-                              .read(taskUsecasesProvider)
-                              .deleteTask(task.id);
-                          break;
-                      }
+                  PlatformPriorityIndicator(priority: task.priority),
+                  PlatformFactory.createIconButton(
+                    icon: Icons.more_vert,
+                    onPressed: () {
+                      PlatformFactory.create(
+                        context,
+                        items: [
+                          MenuItem(
+                            label: 'Editar',
+                            icon: Icons.edit,
+                            onTap: () {
+                              PlatformNavigation.push(
+                                context,
+                                TaskFormPage(initialTask: task),
+                              );
+                            },
+                          ),
+                          MenuItem(
+                            label: 'Eliminar',
+                            icon: Icons.delete,
+                            onTap: () {
+                              ref
+                                  .read(taskUsecasesProvider)
+                                  .deleteTask(task.id);
+                            },
+                          ),
+                        ],
+                      );
                     },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: 8),
-                            Text('Editar'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Eliminar',
-                                style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
               if (task.tags.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children:
-                      task.tags.map((tag) => _buildTag(tag, theme)).toList(),
+                PlatformChipList(
+                  items: task.tags,
+                  scrollable: true,
+                  direction: Axis.horizontal,
                 ),
               ],
               const SizedBox(height: 8),
               Row(
                 children: [
-                  _buildStatusChip(task.status, theme),
+                  PlatformChip.status(task.status),
                   const Spacer(),
                   if (task.assignedUser.isNotEmpty) ...[
                     Icon(
@@ -167,57 +151,6 @@ class TaskItemWidget extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTag(String tag, ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        tag,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onPrimaryContainer,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(TaskStatus status, ThemeData theme) {
-    Color color = status.color;
-    String label = status.label;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPriorityIndicator(TaskPriority priority, ThemeData theme) {
-    Color color = priority.color;
-
-    return Container(
-      width: 4,
-      height: 40,
-      margin: const EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(2),
       ),
     );
   }
