@@ -2,6 +2,12 @@
 
 Una aplicación de gestión de tareas desarrollada en Flutter con funcionalidades de IA.
 
+# Documentacion de versiones
+
+En el archivo `CHANGELOG.md` se documentan las versiones de la aplicación, incluyendo nuevas funcionalidades, correcciones de errores y mejoras.
+
+en la rama `release/v2.0.0` se encuentra una version con cambios en el diseño de iOS y Android y funcionalidad para autocompletar toda la tarea con IA solo tomando el titulo.
+
 ## Características
 
 - **Gestión de Tareas**: Crear, editar, completar y eliminar tareas
