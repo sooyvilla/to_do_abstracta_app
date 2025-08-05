@@ -1,5 +1,11 @@
 # CHANGELOG
 
+# [2.0.0+3] 05-Agosto-2025 (Sebastian Villa)
+
+## Features
+- Se implemento sistema de diseño adaptable para los sistemas operativos iOS y Android
+- Se implemento la funcionalidad de autocompletar tareas con IA tomando el titulo de la tarea
+
 # [1.1.0+2] 31-Jul-2025 (Sebastian Villa)
 
 ## Features
