@@ -1,6 +1,9 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_Animations.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:to_do_abstracta_app/presentation/providers/task_providers.dart';
 import 'package:to_do_abstracta_app/presentation/widgets/task_item_widget.dart';
 
@@ -15,32 +18,39 @@ class TaskListWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasksAsync = ref.watch(filteredTasksProvider);
+    final isIOS = Platform.isIOS;
 
     return tasksAsync.when(
       data: (tasks) {
         if (tasks.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.task_alt,
+                  isIOS ? CupertinoIcons.checkmark_circle : Icons.task_alt,
                   size: 64,
-                  color: Colors.grey,
+                  color: isIOS
+                      ? CupertinoColors.systemGrey
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   'No hay tareas',
                   style: TextStyle(
                     fontSize: 18,
-                    color: Colors.grey,
+                    color: isIOS
+                        ? CupertinoColors.secondaryLabel
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Toca el botón + para crear tu primera tarea',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: isIOS
+                        ? CupertinoColors.tertiaryLabel
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

@@ -1,3 +1,6 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:to_do_abstracta_app/core/theme/app_theme.dart';
@@ -15,13 +18,25 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
 
-    return MaterialApp(
-      title: 'Todo Abstracta App',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
-      home: const HomePage(),
-      debugShowCheckedModeBanner: false,
-    );
+    if (Platform.isIOS) {
+      return const CupertinoApp(
+        title: 'Todo Abstracta App',
+        theme: CupertinoThemeData(
+          primaryColor: CupertinoColors.systemBlue,
+          brightness: Brightness.light,
+        ),
+        home: HomePage(),
+        debugShowCheckedModeBanner: false,
+      );
+    } else {
+      return MaterialApp(
+        title: 'Todo Abstracta App',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode,
+        home: const HomePage(),
+        debugShowCheckedModeBanner: false,
+      );
+    }
   }
 }

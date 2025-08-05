@@ -6,6 +6,7 @@ import 'package:to_do_abstracta_app/presentation/pages/task_detail_page.dart';
 import 'package:to_do_abstracta_app/presentation/widgets/platform_chips.dart';
 import 'package:to_do_abstracta_app/presentation/widgets/platform_factory.dart';
 import 'package:to_do_abstracta_app/presentation/widgets/platform_navigation.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_task_handler.dart';
 
 /// Widget que representa un elemento individual de tarea en la lista.
 ///
@@ -87,33 +88,15 @@ class TaskItemWidget extends ConsumerWidget {
                     ),
                   ),
                   PlatformPriorityIndicator(priority: task.priority),
-                  PlatformFactory.createIconButton(
-                    icon: Icons.more_vert,
-                    onPressed: () {
-                      PlatformFactory.create(
-                        context,
-                        items: [
-                          MenuItem(
-                            label: 'Editar',
-                            icon: Icons.edit,
-                            onTap: () {
-                              PlatformNavigation.push(
-                                context,
-                                TaskFormPage(initialTask: task),
-                              );
-                            },
-                          ),
-                          MenuItem(
-                            label: 'Eliminar',
-                            icon: Icons.delete,
-                            onTap: () {
-                              ref
-                                  .read(taskUsecasesProvider)
-                                  .deleteTask(task.id);
-                            },
-                          ),
-                        ],
-                      );
+                  PlatformFactory.createCardMenu(
+                    onEdit: () {
+                      PlatformTaskHandler.editTask(context, task);
+                    },
+                    onDelete: () async {
+                      final confirmed = await _showDeleteConfirmation(context);
+                      if (confirmed) {
+                        ref.read(taskUsecasesProvider).deleteTask(task.id);
+                      }
                     },
                   ),
                 ],
@@ -153,5 +136,28 @@ class TaskItemWidget extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> _showDeleteConfirmation(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirmar Eliminación'),
+            content: Text(
+                '¿Estás seguro de que quieres eliminar la tarea "${task.title}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Eliminar'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

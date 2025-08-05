@@ -5,8 +5,9 @@ import 'package:to_do_abstracta_app/core/di/injection.dart';
 import 'package:to_do_abstracta_app/core/extensions/task_extensions.dart';
 import 'package:to_do_abstracta_app/data/models/task_model.dart';
 import 'package:to_do_abstracta_app/domain/entities/task.dart';
-import 'package:to_do_abstracta_app/presentation/pages/task_form_page.dart';
 import 'package:to_do_abstracta_app/presentation/providers/task_providers.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_factory.dart';
+import 'package:to_do_abstracta_app/presentation/widgets/platform_task_handler.dart';
 
 /// Página de detalles de una tarea específica.
 ///
@@ -36,82 +37,46 @@ class TaskDetailPage extends ConsumerWidget {
               Navigator.pop(context);
             }
           });
-          return const Scaffold(
-            body: Center(child: Text('Tarea no encontrada')),
+          return PlatformFactory.createScaffold(
+            body: const Center(child: Text('Tarea no encontrada')),
           );
         }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Detalles de Tarea'),
+        return PlatformFactory.createScaffold(
+          appBar: PlatformFactory.createAppBar(
+            title: 'Detalles de Tarea',
             actions: [
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TaskFormPage(task: task),
-                    ),
-                  );
+              PlatformFactory.createDetailsMenu(
+                onEdit: () {
+                  PlatformTaskHandler.editTask(context, task);
                 },
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) async {
-                  switch (value) {
-                    case 'delete':
-                      final confirmed =
-                          await _showDeleteConfirmation(context, task);
-                      if (confirmed && context.mounted) {
-                        Navigator.pop(context);
-                        await ref
-                            .read(taskUsecasesProvider)
-                            .deleteTask(task.id);
-                      }
-                      break;
-                    case 'duplicate':
-                      final duplicatedTask = task.copyWith(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        title: '(Copia) ${task.title}',
-                        createdAt: DateTime.now(),
-                        updatedAt: null,
-                        status: TaskStatus.pending,
-                      );
-                      await ref
-                          .read(taskUsecasesProvider)
-                          .createTask(duplicatedTask);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Tarea duplicada exitosamente'),
-                          ),
-                        );
-                      }
-                      break;
+                onDuplicate: () async {
+                  final duplicatedTask = task.copyWith(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    title: '(Copia) ${task.title}',
+                    createdAt: DateTime.now(),
+                    updatedAt: null,
+                    status: TaskStatus.pending,
+                  );
+                  await ref
+                      .read(taskUsecasesProvider)
+                      .createTask(duplicatedTask);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Tarea duplicada exitosamente'),
+                      ),
+                    );
                   }
                 },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'duplicate',
-                    child: Row(
-                      children: [
-                        Icon(Icons.copy),
-                        SizedBox(width: 8),
-                        Text('Duplicar'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Eliminar', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
+                onDelete: () async {
+                  final confirmed =
+                      await _showDeleteConfirmation(context, task);
+                  if (confirmed && context.mounted) {
+                    Navigator.pop(context);
+                    await ref.read(taskUsecasesProvider).deleteTask(task.id);
+                  }
+                },
               ),
             ],
           ),
@@ -289,17 +254,17 @@ class TaskDetailPage extends ConsumerWidget {
           ),
         );
       },
-      loading: () => Scaffold(
-        appBar: AppBar(
-          title: const Text('Detalles de Tarea'),
+      loading: () => PlatformFactory.createScaffold(
+        appBar: PlatformFactory.createAppBar(
+          title: 'Detalles de Tarea',
         ),
         body: const Center(
           child: CircularProgressIndicator(),
         ),
       ),
-      error: (error, stack) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Detalles de Tarea'),
+      error: (error, stack) => PlatformFactory.createScaffold(
+        appBar: PlatformFactory.createAppBar(
+          title: 'Detalles de Tarea',
         ),
         body: Center(
           child: Column(

@@ -24,7 +24,6 @@ void main() {
     });
 
     testWidgets('should render TaskDetailPage', (tester) async {
-      // Arrange
       final testTask = Task(
         id: 'test-task-id',
         title: 'Test Task',
@@ -53,7 +52,6 @@ void main() {
 
       await tester.pump();
 
-      // Act & Assert
       expect(find.byType(TaskDetailPage), findsOneWidget);
       expect(find.byType(Scaffold), findsOneWidget);
     });

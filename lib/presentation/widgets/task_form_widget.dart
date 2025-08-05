@@ -148,15 +148,12 @@ class _TaskFormWidgetState extends ConsumerState<TaskFormWidget> {
               ],
             ),
             const SizedBox(height: 16),
-            ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 60, maxHeight: 300),
-              child: _buildPlatformTextField(
-                controller: _descriptionController,
-                labelText: 'Descripción',
-                hintText: 'Describe la tarea...',
-                maxLines: 5,
-                onChanged: formNotifier.updateDescription,
-              ),
+            _buildPlatformTextField(
+              controller: _descriptionController,
+              labelText: 'Descripción',
+              hintText: 'Describe la tarea...',
+              maxLines: 4,
+              onChanged: formNotifier.updateDescription,
             ),
             const SizedBox(height: 16),
             _buildPlatformTextField(

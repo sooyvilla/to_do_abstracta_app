@@ -64,7 +64,6 @@ class _IOSTaskModalContent extends ConsumerWidget {
     return Material(
       child: Column(
         children: [
-          // Header con botones de acción
           Container(
             padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
@@ -111,7 +110,6 @@ class _IOSTaskModalContent extends ConsumerWidget {
               ],
             ),
           ),
-          // Contenido del formulario
           Expanded(
             child: TaskFormWidget(task: task),
           ),

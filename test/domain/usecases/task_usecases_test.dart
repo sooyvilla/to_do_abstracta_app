@@ -134,7 +134,6 @@ void main() {
       when(mockRepository.getTaskById('nonexistent'))
           .thenAnswer((_) async => null);
 
-      // This should not throw and should not call updateTask
       await taskUsecases.toggleTaskStatus('nonexistent');
 
       verify(mockRepository.getTaskById('nonexistent')).called(1);

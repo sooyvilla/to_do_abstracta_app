@@ -139,40 +139,61 @@ class PlatformChip extends StatelessWidget {
   Widget _buildMaterialChip(BuildContext context) {
     final theme = Theme.of(context);
     final chipColor = color ?? theme.colorScheme.primary;
+    final backgroundColor = style == PlatformChipStyle.filled
+        ? chipColor.withValues(alpha: 0.1)
+        : theme.colorScheme.surface;
+    final borderColor = chipColor.withValues(alpha: 0.3);
     final finalTextColor = textColor ??
         (style == PlatformChipStyle.filled
             ? chipColor
             : theme.colorScheme.onSurface);
 
-    if (onDelete != null) {
-      return Chip(
-        label: Text(text),
-        avatar: icon != null ? Icon(icon, size: 16) : null,
-        onDeleted: onDelete,
-        labelStyle: TextStyle(
-          color: finalTextColor,
-          fontWeight: FontWeight.w500,
-        ),
-        backgroundColor: style == PlatformChipStyle.filled
-            ? chipColor.withValues(alpha: 0.1)
-            : null,
-        side: BorderSide(color: chipColor.withValues(alpha: 0.3)),
+    Widget child = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: finalTextColor),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: TextStyle(
+              color: finalTextColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          if (onDelete != null) ...[
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: onDelete,
+              child: Icon(
+                Icons.close,
+                size: 16,
+                color: finalTextColor.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (onTap != null) {
+      child = InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: child,
       );
     }
 
-    return ActionChip(
-      label: Text(text),
-      avatar: icon != null ? Icon(icon, size: 16) : null,
-      onPressed: onTap,
-      labelStyle: TextStyle(
-        color: finalTextColor,
-        fontWeight: FontWeight.w500,
-      ),
-      backgroundColor: style == PlatformChipStyle.filled
-          ? chipColor.withValues(alpha: 0.1)
-          : null,
-      side: BorderSide(color: chipColor.withValues(alpha: 0.3)),
-    );
+    return child;
   }
 }
 
